@@ -124,6 +124,7 @@ class UserActivate(Resource):
     # @jwt_required
     def post(self):
         """ Activate new User """
+
         if "activation_code" not in request.json or request.json["activation_code"] == "":
             return api.abort(
                 400, "Activation code should not be empty.", status="error", status_code=400
@@ -143,10 +144,15 @@ class UserActivate(Resource):
         email = decoded['email']
         log.info("Activating {}".format(email))
         res = self.user_service.activate_user(email)
+
+        if res["status"] == -1:
+            return api.abort(
+                400, res["response"], status="error", status_code=400
+            )
         if "password" in res:
             del res["password"]
 
-        return {"status": "success", "res": res, "message": "ok"}, 201
+        return {"status": "success", "message": "ok"}, 201
 
 
 user_login_model = api.model(
@@ -213,7 +219,8 @@ class TokenRefresh(Resource):
     """docstring for TokenRefresh."""
 
     def __init__(self, args):
-        super(TokenRefresh, self).__init__()
+        super(TokenRefresh, self).__init__(args)
+        self.user_service = UserService()
 
     @jwt_required(refresh=True)
     def post(self):
@@ -226,29 +233,9 @@ class TokenRefresh(Resource):
         return {"status": "success", "access_token": access_token}, 200
 
 
-@api.route("/auth/logOut")
-class UserLogOut(Resource):
-    """docstring for Log Out."""
-
-    def __init__(self, args):
-        super(UserLogOut, self).__init__()
-        self.blacklist = BlacklistHelper()
-
-    @jwt_required()
-    def post(self):
-        """ User logout API """
-        current_user = get_jwt_identity()
-        log.info(current_user)
-        code, msg = self.blacklist.revoke_token(current_user)
-        log.info({code, msg})
-
-        return {"status": "success", "msg": msg}, code
-
-
 user_change_password_model = api.model(
     "ChangePasswordModel",
     {
-        "email": fields.String(description="Email address", required=True),
         "password": fields.String(description="Old Password", required=True),
         "new_password": fields.String(description="New Password", required=True),
     },
@@ -260,21 +247,16 @@ class ChangePassword(Resource):
     """docstring for Password Update."""
 
     def __init__(self, args):
-        super(ChangePassword, self).__init__()
+        super(ChangePassword, self).__init__(args)
+        self.jwt_service = JWTService()
+        self.user_service = UserService()
 
+    @api.expect(user_change_password_model)
     @jwt_required()
     def post(self):
-        """ Password Change - WIP """
-        if "email" not in request.json or request.json["email"] == "":
-            return api.abort(
-                400, "Email should not be empty.", status="error", status_code=400
-            )
-
-        email = request.json["email"]
-        if not re.match(r'^[A-Za-z0-9\.\+_-]+@[A-Za-z0-9\._-]+\.[a-zA-Z]*$', email):
-            return api.abort(
-                400, "Email is not valid.", status="error", status_code=400
-            )
+        """ Password Change """
+        current_user_email = get_jwt_identity()
+        print(current_user_email)
 
         if "password" not in request.json or request.json["password"] == "":
             return api.abort(
@@ -296,5 +278,31 @@ class ChangePassword(Resource):
             )
 
         # all good to change password
+        new_password = self.jwt_service.hash_password(new_password)
+        resp = self.user_service.passwordChange(current_user_email, new_password)
 
-        return {"status": "success", "msg": 'This is WIP. Not implemented yet'}, 200
+        if resp["status"] == -1:
+            return api.abort(
+                400, resp["response"], status="error", status_code=400
+            )
+
+        return {"status": "success", "msg": 'Password Changed Successfully'}, 200
+
+
+@api.route("/auth/logOut")
+class UserLogOut(Resource):
+    """docstring for Log Out."""
+
+    def __init__(self, args):
+        super(UserLogOut, self).__init__()
+        self.blacklist = BlacklistHelper()
+
+    @jwt_required()
+    def post(self):
+        """ User logout API """
+        current_user = get_jwt_identity()
+        log.info(current_user)
+        code, msg = self.blacklist.revoke_token(current_user)
+        log.info({code, msg})
+
+        return {"status": "success", "msg": msg}, code

@@ -60,7 +60,8 @@ class UserService:
             )
 
     def activate_user(self, email):
-        user = self.mongo.find(self.collection, {"email": email})
+        # ToDo : If activated user reattempts, we shouldn't allow
+        user = self.mongo.find(self.collection, {"email": email, "active": False})
         if user:
             log.info(user)
             log.info("Found user to activate {}" + user[0]["_id"])
@@ -68,16 +69,26 @@ class UserService:
             res, res_obj = self.mongo.update(self.collection, user[0]["_id"], query)
             if res:
                 del res_obj["password"]
-                return "success", res_obj, "ok", 200
+                return {"status": 0, "response": f'Activated Successfully'}
             else:
-                return "error", "", "Something went wrong.", 400
+                return {"status": -1, "response": f'Something went wrong.'}
         else:
-            return (
-                "error",
-                "",
-                f' We could not activate',
-                400,
-            )
+            return {"status": -1, "response": f'We could not activate'}
+
+    def passwordChange(self, email, new_password):
+        # Password change is allowed for activated users only
+        user = self.mongo.find(self.collection, {"email": email, "active": True})
+        if user:
+            log.info("Found user to change password {}" + user[0]["_id"])
+            query = {"$set": {'password': new_password}}
+            res, res_obj = self.mongo.update(self.collection, user[0]["_id"], query)
+            if res:
+                del res_obj["password"]
+                return {"status": 0, "response": f'Password Changed Successfully'}
+            else:
+                return {"status": -1, "response": f'Something went wrong.'}
+        else:
+            return {"status": -1, "response": f'We could not change password'}
 
     def delete_user(self, user_id):
         return self.mongo.delete(self.collection, user_id)

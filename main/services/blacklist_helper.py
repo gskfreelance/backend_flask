@@ -41,8 +41,11 @@ class BlacklistHelper:
             # token.revoked = True
             # make token.revoked = False and save it into database
             for t in token:
+                t["revoked"] = True
                 del t["expires"]
                 print(t)
+                query = {"$set": t}
+                self.mongo.update(self.collection, query)
             return 200, "Successfully logged out."
         else:
             return 404, "Token not found."
