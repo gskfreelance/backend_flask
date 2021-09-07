@@ -45,8 +45,8 @@ def create_app():
     #     return jti in blacklist
 
     @app.route("/")
-    def hello_world():
+    def health_check():
         # render home template
-        return "Hello, World!"
+        return "App is healthy!"
 
     return app
