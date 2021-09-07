@@ -1,10 +1,13 @@
 import datetime
 import logging as log
+import random
 import re
 
 import jwt
-from flask_mail import Mail, Message
+# from flask_mail import Mail, Message
+from sendgrid import SendGridAPIClient
 from flask_restx import Namespace, Resource, fields
+from sendgrid.helpers.mail import Mail
 
 api = Namespace("Authentication", description="Authentication related APIs")
 from flask import request
@@ -70,7 +73,9 @@ class UserRegister(Resource):
         )
 
         # Lets set the status as "pending activation"
-        request.json["active"] = False
+        # request.json["active"] = False
+        # For MVP, we are bypassing activation process
+        request.json["active"] = True
         res = self.user_service.add_user(request.json)
 
         log.info(res["status"])
@@ -87,19 +92,24 @@ class UserRegister(Resource):
             del res["password"]
 
         # We are able to save new user as inactive. Lets send the activation code to email ID provided
-        # ToDo : This is costly operation. This should go to offline task management.
-        # ToDo : We should ideally just create a task and leave email process to offline job
+        # ToDo : This is costly operation. For MVP, this is ok but for PROD this should go to offline task management.
+        # ToDo : Do we need this as OTP or activation string
         exp = datetime.datetime.utcnow() + datetime.timedelta(days=app.config['ACTIVATION_EXPIRE_DAYS'])
         encoded = jwt.encode({'email': email, 'exp': exp},
                              app.config['ENCODE_KEY'], algorithm='HS256')
-        message = 'Hello {} \n activation_code = {}'.format(name, encoded)
-        msg = Message(recipients=[email],
-                      body=message,
-                      subject='Activation Code',
-                      sender='Flask App')
-        self.mail.send(msg)
-        log.info(message)
-        return {"status": "success", "res": res, "message": "ok"}, 201
+        message = 'Hello {}, <br /> Your activation code is <strong>{}</strong>'.format(name, encoded)
+
+        message = Mail(from_email='contactcarretorg@gmail.com', to_emails=email, subject='OTP for login validation', html_content=message)
+        try:
+            sg = SendGridAPIClient('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')
+            response = sg.send(message)
+            print(response.status_code)
+            print(response.body)
+            print(response.headers)
+            return {"status": "success", 'message': ' Email sent'}, 201
+        except Exception as e:
+            print(e.message)
+            return {"status": "error",  'message': e.message}, 400
 
 
 user_activation_model = api.model(
