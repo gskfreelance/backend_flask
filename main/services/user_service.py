@@ -73,6 +73,7 @@ class UserService:
             else:
                 return {"status": -1, "response": f'Something went wrong.'}
         else:
+            log.info("we couldn't find user")
             return {"status": -1, "response": f'We could not activate'}
 
     def passwordChange(self, email, new_password):

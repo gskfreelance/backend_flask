@@ -70,7 +70,7 @@ class UserRegister(Resource):
         )
 
         # Lets set the status as "pending activation"
-        request.json["active"] = "False"
+        request.json["active"] = False
         res = self.user_service.add_user(request.json)
 
         log.info(res["status"])
