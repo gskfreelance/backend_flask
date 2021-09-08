@@ -101,7 +101,7 @@ class UserRegister(Resource):
 
         message = Mail(from_email='contactcarretorg@gmail.com', to_emails=email, subject='OTP for login validation', html_content=message)
         try:
-            sg = SendGridAPIClient('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')
+            sg = SendGridAPIClient('')
             response = sg.send(message)
             print(response.status_code)
             print(response.body)
