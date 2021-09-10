@@ -1,7 +1,9 @@
 import datetime
 import logging as log
+import eventlet
+eventlet.monkey_patch()
 
-from flask import Flask
+from flask import Flask, request, session
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS
 from flask_jwt_extended import (
@@ -10,6 +12,11 @@ from flask_jwt_extended import (
 
 import config
 from .db import MongoDB
+from main.services.binance_service import BinanceService
+
+from flask_socketio import SocketIO
+from flask_cors import CORS
+from .websocket import WebSocketHandler
 
 
 def create_app():
@@ -18,7 +25,8 @@ def create_app():
     app.config.from_object(config)
     app.config["log"] = log
 
-    cors = CORS(app)
+    # cors = CORS(app)
+    cors = CORS(app, resources={r"/": {"origins": ""}})
     app.config["CORS_HEADERS"] = "Content-Type"
 
     # Configs needed for JWT service
@@ -50,3 +58,13 @@ def create_app():
         return "App is healthy!"
 
     return app
+
+
+def create_socket(app):
+    cors = CORS(app, resources={r"/": {"origins": ""}})
+    socket_io = SocketIO(app, cors_allowed_origins="*")
+
+    with app.app_context():
+        websockethhandler = WebSocketHandler(socket_io)
+
+    return socket_io

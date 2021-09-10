@@ -4,7 +4,7 @@ import coloredlogs
 from flask_restx import Api
 
 # local imports
-from main import create_app
+from main import create_app, create_socket
 from main.apis.auth import api as auth
 
 coloredlogs.install()
@@ -28,7 +28,8 @@ app.config['ROOT_DIR'] = pathlib.Path(__file__).parent.absolute()
 # Endpoints
 api.add_namespace(auth, path='/v1')
 
+socket_io = create_socket(app)
 
 # Run Server
 if __name__ == '__main__':
-    app.run()
+    socket_io.run(app)

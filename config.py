@@ -27,3 +27,7 @@ DB_USER = os.getenv("DB_USER")
 # move this to os.env
 DB_PASSWORD = os.getenv("DB_PASSWORD")
 
+# Binance Keys
+binance_api_key = os.environ.get('binance_api')
+binance_api_secret = os.environ.get('binance_secret')
+binance_api_url = 'https://testnet.binance.vision/api'
