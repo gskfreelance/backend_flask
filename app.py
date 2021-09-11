@@ -6,6 +6,7 @@ from flask_restx import Api
 # local imports
 from main import create_app, create_socket
 from main.apis.auth import api as auth
+from main.apis.binance import api as binance
 
 coloredlogs.install()
 
@@ -27,6 +28,7 @@ app.config['ROOT_DIR'] = pathlib.Path(__file__).parent.absolute()
 
 # Endpoints
 api.add_namespace(auth, path='/v1')
+api.add_namespace(binance, path='/v1')
 
 socket_io = create_socket(app)
 

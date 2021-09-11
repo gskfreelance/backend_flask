@@ -1,7 +1,7 @@
 import logging as log
 from flask import current_app as app
 
-from main.db import MongoDB
+from main.database.db import MongoDB
 from main.services.blacklist_helper import BlacklistHelper
 
 

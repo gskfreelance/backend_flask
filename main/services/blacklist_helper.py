@@ -1,6 +1,6 @@
 from datetime import datetime
 from flask_jwt_extended import decode_token
-from main.db import MongoDB
+from main.database.db import MongoDB
 
 
 class BlacklistHelper:

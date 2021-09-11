@@ -1,11 +1,11 @@
 import os
 # Bunch of configurations for system
 # ToDO : move these to Config class to have environement specific configurations
-# ToDo : Read sensitive data like secrets, passwords etc from OS Environment variable
+
 
 DEBUG = True
 
-# sensitive, move this to os env
+
 ENCODE_KEY = os.getenv("ENCODE_KEY")
 
 # Email Server Config
@@ -24,10 +24,9 @@ DB_HOST = os.getenv("DB_HOST")
 DB_PORT = 27017
 DB_NAME = os.getenv("DB_NAME")
 DB_USER = os.getenv("DB_USER")
-# move this to os.env
 DB_PASSWORD = os.getenv("DB_PASSWORD")
 
 # Binance Keys
-binance_api_key = os.environ.get('binance_api')
-binance_api_secret = os.environ.get('binance_secret')
-binance_api_url = 'https://testnet.binance.vision/api'
+BINANCE_API_KEY = os.getenv("binance_api")
+BINANCE_API_SECRET = os.getenv("binance_secret")
+BINANCE_API_URL = "https://testnet.binance.vision/api"

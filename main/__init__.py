@@ -3,15 +3,14 @@ import logging as log
 import eventlet
 eventlet.monkey_patch()
 
-from flask import Flask, request, session
+from flask import Flask
 from flask_bcrypt import Bcrypt
-from flask_cors import CORS
 from flask_jwt_extended import (
     JWTManager,
 )
 
 import config
-from .db import MongoDB
+from main.database.db import MongoDB
 from main.services.binance_service import BinanceService
 
 from flask_socketio import SocketIO
@@ -61,10 +60,11 @@ def create_app():
 
 
 def create_socket(app):
+    print(app.config)
     cors = CORS(app, resources={r"/": {"origins": ""}})
     socket_io = SocketIO(app, cors_allowed_origins="*")
 
-    with app.app_context():
-        websockethhandler = WebSocketHandler(socket_io)
+    # with app.app_context():
+    #     websockethhandler = WebSocketHandler(socket_io)
 
     return socket_io
