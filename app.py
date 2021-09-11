@@ -1,14 +1,12 @@
 import pathlib
 
-import coloredlogs
+
 from flask_restx import Api
 
 # local imports
 from main import create_app, create_socket
 from main.apis.auth import api as auth
 from main.apis.binance import api as binance
-
-coloredlogs.install()
 
 authorizations = {
     'token': {
