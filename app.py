@@ -27,8 +27,9 @@ app.config['ROOT_DIR'] = pathlib.Path(__file__).parent.absolute()
 api.add_namespace(auth, path='/v1')
 api.add_namespace(binance, path='/v1')
 
-socket_io = create_socket(app)
+# socket_io = create_socket(app)
 
 # Run Server
 if __name__ == '__main__':
-    socket_io.run(app)
+    # socket_io.run(app)
+    app.run()
