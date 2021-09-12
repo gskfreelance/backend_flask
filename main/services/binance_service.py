@@ -3,12 +3,14 @@ from binance.client import Client
 from flask import current_app as app
 import requests
 
+
 class BinanceService:
     """ doc string for BinanceService """
 
     def __init__(self):
         super(BinanceService, self).__init__()
         self.client = Client(app.config["BINANCE_API_KEY"], app.config["BINANCE_API_SECRET"])
+        self.collection = ""
 
     def getAllTickers(self):
         symbols = []

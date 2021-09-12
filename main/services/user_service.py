@@ -33,32 +33,42 @@ class UserService:
         else:
             return {"status": -1, "response": f'User with {user_obj["email"]} already existed.'}
 
-    def get_user(self, user_id):
-        """ Get User profile by id. ex _id:  """
-        res = self.mongo.find_by_id(self.collection, user_id)
-        if res:
-            del res["password"]
-            return "success", res, "ok", 200
-        else:
-            return "error", [], "Something went wrong.", 400
+    # def get_user(self, user_id):
+    #     """ Get User profile by id. ex _id:  """
+    #     res = self.mongo.find_by_id(self.collection, user_id)
+    #     if res:
+    #         del res["password"]
+    #         return "success", res, "ok", 200
+    #     else:
+    #         return "error", [], "Something went wrong.", 400
 
-    def update_user(self, _id, user_obj):
-        user = self.mongo.find(self.collection, {"email": user_obj["email"]})
-        if not user:
-            query = {"$set": user_obj}
-            res, res_obj = self.mongo.update(self.collection, _id, query)
-            if res:
-                del res_obj["password"]
-                return "success", res_obj, "ok", 200
-            else:
-                return "error", "", "Something went wrong.", 400
+    def get_user_from_email(self, email):
+        """ Get User profile by email.  """
+        user = self.mongo.find(self.collection, {"email": email})
+        if user:
+            del user[0]["password"]
+            print(user)
+            return {"status": 0, "response": user[0]}
         else:
-            return (
-                "error",
-                "",
-                f'Email {user_obj["email"]} address already in use.',
-                400,
-            )
+            return {"status": -1, "response": f'We could not find user'}
+
+    # def update_user(self, _id, user_obj):
+    #     user = self.mongo.find(self.collection, {"email": user_obj["email"]})
+    #     if not user:
+    #         query = {"$set": user_obj}
+    #         res, res_obj = self.mongo.update(self.collection, _id, query)
+    #         if res:
+    #             del res_obj["password"]
+    #             return "success", res_obj, "ok", 200
+    #         else:
+    #             return "error", "", "Something went wrong.", 400
+    #     else:
+    #         return (
+    #             "error",
+    #             "",
+    #             f'Email {user_obj["email"]} address already in use.',
+    #             400,
+    #         )
 
     def activate_user(self, email):
         # ToDo : If activated user reattempts, we shouldn't allow
