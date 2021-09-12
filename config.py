@@ -29,3 +29,6 @@ DB_PASSWORD = os.getenv("DB_PASSWORD")
 BINANCE_API_KEY = os.getenv("binance_api")
 BINANCE_API_SECRET = os.getenv("binance_secret")
 BINANCE_API_URL = "https://testnet.binance.vision/api"
+
+# WazirX Keys
+WAZIRX_API_URL = "https://api.wazirx.com/api/v2/tickers"
