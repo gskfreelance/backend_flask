@@ -1,12 +1,11 @@
 import datetime
 import logging as log
-import random
 import re
 
 import jwt
+from flask_restx import Namespace, Resource, fields
 # from flask_mail import Mail, Message
 from sendgrid import SendGridAPIClient
-from flask_restx import Namespace, Resource, fields
 from sendgrid.helpers.mail import Mail
 
 api = Namespace("Authentication", description="Authentication related APIs")
@@ -99,7 +98,8 @@ class UserRegister(Resource):
                              app.config['ENCODE_KEY'], algorithm='HS256')
         message = 'Hello {}, <br /> Your activation code is <strong>{}</strong>'.format(name, encoded)
 
-        message = Mail(from_email='contactcarretorg@gmail.com', to_emails=email, subject='OTP for login validation', html_content=message)
+        message = Mail(from_email='contactcarretorg@gmail.com', to_emails=email, subject='OTP for login validation',
+                       html_content=message)
         try:
             sg = SendGridAPIClient('')
             response = sg.send(message)
@@ -109,7 +109,7 @@ class UserRegister(Resource):
             return {"status": "success", 'message': ' Email sent'}, 201
         except Exception as e:
             print(e.message)
-            return {"status": "error",  'message': e.message}, 400
+            return {"status": "error", 'message': e.message}, 400
 
 
 user_activation_model = api.model(

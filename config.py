@@ -1,10 +1,10 @@
 import os
+
 # Bunch of configurations for system
 # ToDO : move these to Config class to have environement specific configurations
 
 
 DEBUG = True
-
 
 ENCODE_KEY = os.getenv("ENCODE_KEY")
 
@@ -17,7 +17,6 @@ MAIL_USERNAME = os.getenv("MAIL_USERNAME")
 MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
 MAIL_DEFAULT_SENDER = 'from@example.com'
 ACTIVATION_EXPIRE_DAYS = 2
-
 
 # Mongo DB Config
 DB_HOST = os.getenv("DB_HOST")

@@ -1,12 +1,6 @@
-import datetime
-import logging as log
-
-from flask_restx import Namespace, Resource, fields
+from flask_restx import Namespace, Resource
 
 api = Namespace("Binance", description="Binance related APIs")
-from flask import request
-from flask import current_app as app
-
 
 from main.services.jwt_service import JWTService
 

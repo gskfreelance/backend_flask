@@ -1,8 +1,7 @@
-from flask import current_app as app
-from binance.client import Client
 from decimal import Decimal
-import datetime
-from objdict import ObjDict
+
+from binance.client import Client
+from flask import current_app as app
 
 
 class BinanceService:
@@ -22,5 +21,3 @@ class BinanceService:
                 pair["price_INR"] = Decimal(pair["price"]) * 2
                 symbols.append(pair)
         return {"assetPrice": symbols, "priceUpdateTime": server_time}, 0
-
-

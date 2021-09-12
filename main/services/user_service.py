@@ -1,4 +1,5 @@
 import logging as log
+
 from flask import current_app as app
 
 from main.database.db import MongoDB

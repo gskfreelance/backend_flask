@@ -1,7 +1,7 @@
-from flask_socketio import SocketIO, join_room, leave_room, emit
-from flask import request, session
+from flask import request
+from flask_socketio import join_room, leave_room, emit
+
 from main.services.binance_service import BinanceService
-from flask import current_app as app
 
 
 class WebSocketHandler:
@@ -14,7 +14,6 @@ class WebSocketHandler:
         self.registerHandlers()
 
     def registerHandlers(self):
-
         connected_clients = []
 
         @self.socket_io.on('connect')
