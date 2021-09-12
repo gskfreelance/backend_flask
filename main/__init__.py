@@ -1,10 +1,6 @@
 import datetime
 import logging as log
 
-import eventlet
-
-eventlet.monkey_patch()
-
 from flask import Flask
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import (
