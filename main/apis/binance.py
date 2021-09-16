@@ -4,7 +4,10 @@ api = Namespace("Binance", description="Binance related APIs")
 
 from main.services.jwt_service import JWTService
 from main.services.user_service import UserService
+from main.services.user_helper import UserHelper
 from main.services.wallet_service import WalletService
+from main.services.order_service import OrderService
+
 
 from main.services.binance_service import BinanceService
 from flask_jwt_extended import (
@@ -37,6 +40,7 @@ binance_place_order = api.model(
     {
         "symbol": fields.String(description="Symbol", required=True),
         "side": fields.String(description="Buy or Sell", required=True),
+        "price": fields.String(description="Unit Price", required=True),
         "orderType": fields.String(description="Market or Limit", required=True),
         "pairQuantity": fields.String(description="pairQuantity", required=True),
     },
@@ -53,63 +57,74 @@ class BinancePlaceOrder(Resource):
         self.user_service = UserService()
         self.wallet_service = WalletService()
         self.binance_service = BinanceService()
+        self.order_service = OrderService()
+        self.user_helper = UserHelper()
 
-    # @api.expect(binance_place_order)
+    @api.expect(binance_place_order)
     @jwt_required()
     def post(self):
         """ Binance Place Order API -  - WIP DO NOT USE"""
 
         email = get_jwt_identity()
-        print(email)
-        service_response = self.user_service.get_user_from_email(email)
 
-        if service_response["status"] == -1:
+        user = self.user_helper.constructFullUserDetails(email)
+
+        if "symbol" not in request.json or request.json["symbol"] == "":
             return api.abort(
-                 400, "We couldn't find current user, hence aborting", status="error", status_code=400
+                400, "Symbol should not be empty.", status="error", status_code=400
             )
 
-        current_user = service_response["response"]
-        current_user_id = current_user[0]["_id"]
+        symbol = request.json["symbol"]
 
-        balance_entries = self.wallet_service.get_wallet_balance(current_user_id)
-        print(balance_entries)
+        if "side" not in request.json or request.json["side"] == "":
+            return api.abort(
+                400, "Side should be not be empty.", status="error", status_code=400
+            )
 
-        # if "symbol" not in request.json or request.json["symbol"] == "":
-        #     return api.abort(
-        #         400, "Symbol should not be empty.", status="error", status_code=400
-        #     )
-        #
-        # symbol = request.json["symbol"]
-        #
-        # if "side" not in request.json or request.json["side"] == "":
-        #     return api.abort(
-        #         400, "Side should be not be empty.", status="error", status_code=400
-        #     )
-        #
-        # side = request.json["side"]
-        #
-        # if "side" not in ["BUY", "SELL"]:
-        #     return api.abort(
-        #         400, "Side should be BUY Or SELL.", status="error", status_code=400
-        #     )
-        #
-        # if "orderType" not in request.json or request.json["orderType"] == "":
-        #     return api.abort(
-        #         400, "Order Type should be not be empty.", status="error", status_code=400
-        #     )
-        #
-        # order_type = request.json["orderType"]
-        #
-        # if "order_type" not in ["MARKET"]:
-        #     return api.abort(
-        #         400, "Only MARKET type order is supported.", status="error", status_code=400
-        #     )
-        #
-        # if "pairQuantity" not in request.json or request.json["pairQuantity"] == "":
-        #     return api.abort(
-        #         400, "Quantity should not be empty.", status="error", status_code=400
-        #     )
-        # pairQuantity = request.json["pairQuantity"]
+        side = request.json["side"]
 
-        return {"status": "success", "message": "This is WIP"}, 200
+        if "side" not in ["BUY", "SELL"]:
+            return api.abort(
+                400, "Side should be BUY Or SELL.", status="error", status_code=400
+            )
+
+        if "orderType" not in request.json or request.json["orderType"] == "":
+            return api.abort(
+                400, "Order Type should be not be empty.", status="error", status_code=400
+            )
+
+        order_type = request.json["orderType"]
+
+        if "order_type" not in ["MARKET"]:
+            return api.abort(
+                400, "Only MARKET type order is supported.", status="error", status_code=400
+            )
+
+        if "pairQuantity" not in request.json or request.json["pairQuantity"] == "":
+            return api.abort(
+                400, "Quantity should not be empty.", status="error", status_code=400
+            )
+        pair_quantity = request.json["pairQuantity"]
+
+        if "price" not in request.json or request.json["price"] == "":
+            return api.abort(
+                400, "Price should not be empty.", status="error", status_code=400
+            )
+        price = request.json["price"]
+
+        order_object = {
+            "user": user,
+            "symbol": symbol,
+            "price": price,
+            "pairQuantity": pair_quantity
+        }
+
+        response = self.order_service.place_order(order_object)
+        if response.status == -1:
+            return {"status": "failure", "message": response.message}, 400
+        else:
+            return {"status": "success", "message": response.message}, 200
+
+
+
 

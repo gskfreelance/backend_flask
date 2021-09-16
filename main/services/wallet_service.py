@@ -37,3 +37,14 @@ class WalletService:
             res, res_obj = self.mongo.update(self.collection, balance_entry[0]["_id"], query)
             return {"status": 0, "response": res_obj}
 
+    def update_balance_for_sell(self, user_id, symbol, quantity):
+        """ doc string for Update balance """
+        balance_entry = self.mongo.find(self.collection, {"user_id": user_id, "symbol": symbol})
+        if not balance_entry:
+            print("User has no balance for " + symbol)
+            return {"status": -1, "response": "Shouldn't sell"}
+        else:
+            new_quantity = float(balance_entry[0]["quantity"]) - quantity
+            query = {"$set": {'quantity': new_quantity}}
+            res, res_obj = self.mongo.update(self.collection, balance_entry[0]["_id"], query)
+            return {"status": 0, "response": res_obj}
